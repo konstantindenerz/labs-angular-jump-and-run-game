@@ -1,4 +1,5 @@
 import {Box, BoxOptions} from "./box";
+import {camera, canvas, getLevelSize} from "./canvas";
 
 export interface PlayerOptions extends BoxOptions {
 
@@ -49,5 +50,47 @@ export class Player extends Box {
           break;
       }
     })
+  }
+
+  override push(box: any, objects: any[]) {
+    return {
+      toLeft: () => {
+        if (box.type !== 'Box') return false;
+        const distance = box.right - this.left;
+        if (box.canBeMoved([-distance, 0], objects)) {
+          box.right = this.left;
+          return true;
+        } else {
+          const smallDistance = box.getDistanceToLeftObject(objects);
+          if (box.canBeMoved([-smallDistance, 0], objects)) {
+            box.left = box.left - smallDistance;
+            this.left = box.right;
+          }
+          return false;
+        }
+
+      },
+      toRight: () => {
+        if (box.type !== 'Box') return false;
+        const distance = box.left - this.right;
+        if (box.canBeMoved([distance, 0], objects)) {
+          box.left = this.right;
+          return true;
+        } else {
+          const smallDistance = box.getDistanceToRightObject(objects);
+          if (box.canBeMoved([smallDistance, 0], objects)) {
+            box.right = box.right + smallDistance;
+            this.right = box.left;
+          }
+          return false;
+        }
+      },
+    }
+  }
+  override specificUpdates() {
+    super.specificUpdates();
+    const [width, height] = getLevelSize();
+    camera.pos[0] = Math.max(0, Math.min(width - canvas.width, this.right - canvas.width / 2));
+    camera.pos[1] = Math.max(0, Math.min(height - canvas.height, this.top - canvas.height / 2));
   }
 }

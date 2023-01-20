@@ -59,16 +59,24 @@ export class Box extends Rectangle {
     this.applyPhysics(deltaTime);
     if (objects !== undefined) {
       objects.forEach(obj => {
-        this.collideWith(obj).fromAbove();
-        this.collideWith(obj).fromBelow();
-        this.collideWith(obj).fromLeft();
-        this.collideWith(obj).fromRight();
+        this.collideWith(obj, objects).fromAbove();
+        this.collideWith(obj, objects).fromBelow();
+        this.collideWith(obj, objects).fromLeft();
+        this.collideWith(obj, objects).fromRight();
       })
     }
     this.boundToLevel();
+    this.specificUpdates();
   }
 
-  private collideWith(obj: Rectangle) {
+  push(obj: any, objects: any[] = []) {
+    return {
+      toLeft: () => false,
+      toRight: () => false,
+    }
+  }
+
+  private collideWith(obj: Rectangle, objects: any[]) {
     return {
       fromAbove: () => {
         if (this.prevBottom <= obj.top && this.overlapsWith(obj)) {
@@ -79,6 +87,7 @@ export class Box extends Rectangle {
       },
       fromLeft: () => {
         if (this.prevRight <= obj.left && this.overlapsWith(obj)) {
+          if (this.push(obj, objects).toRight()) return;
           this.right = obj.left;
           this.vel[0] = 0;
         }
@@ -91,8 +100,9 @@ export class Box extends Rectangle {
       },
       fromRight: () => {
         if (this.prevLeft >= obj.right && this.overlapsWith(obj)) {
+          if (this.push(obj, objects).toLeft()) return;
           this.left = obj.right;
-          this.vel[0] =0;
+          this.vel[0] = 0;
         }
       }
     }
@@ -112,5 +122,45 @@ export class Box extends Rectangle {
       this.right = width;
       this.vel[0] = 0;
     }
+  }
+
+  canBeMoved(offset: [number, number], objects: any[]) {
+    const [width, height] = getLevelSize();
+
+    if (this.left + offset[0] < 0 ||
+      this.right + offset[0] > width ||
+      this.top + offset[1] < 0 ||
+      this.bottom + offset[1] > height) {
+      return false;
+    }
+    return objects.filter(obj => obj.type === 'Rectangle' || obj.type === 'Box').every(obj => !this.overlapsWith(obj, offset))
+  }
+
+
+  getDistanceToRightObject(objects: any[]) {
+    const [width, height] = getLevelSize();
+    let d = width - this.right;
+    objects.filter(obj => obj.type === 'Rectangle' || obj.type === "Box").forEach(obj => {
+      if (this.right <= obj.left && this.bottom > obj.top && this.top < obj.bottom) {
+        d = Math.min(d, obj.left - this.right)
+      }
+    });
+    return d;
+  }
+
+
+  getDistanceToLeftObject(objects: any[]) {
+    const [width, height] = getLevelSize();
+    let d = width - this.left;
+    objects.filter(obj => obj.type === 'Rectangle' || obj.type === "Box").forEach(obj => {
+      if (this.left >= obj.right && this.bottom > obj.top && this.top < obj.bottom) {
+        d = Math.min(d, this.left - obj.right)
+      }
+    });
+    return d;
+  }
+
+  public specificUpdates() {
+
   }
 }
