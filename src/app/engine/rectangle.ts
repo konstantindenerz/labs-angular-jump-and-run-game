@@ -11,7 +11,7 @@ export class Rectangle {
   public size: [number, number];
   public color: string;
 
-  constructor(options: RectangleOptions) {
+  constructor(options: RectangleOptions, public type = 'Rectangle') {
     this.pos = options.pos;
     this.size = options.size;
     this.color = options.color;
@@ -62,5 +62,9 @@ export class Rectangle {
       this.bottom >= obj.top &&
       this.top <= obj.bottom
     )
+  }
+
+  update(deltaTime: number) {
+
   }
 }
