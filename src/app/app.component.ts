@@ -1,4 +1,5 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {preloadImages} from "./engine/images";
 import {render} from "./engine/main";
 
 @Component({
@@ -6,12 +7,14 @@ import {render} from "./engine/main";
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   title = 'labs-angular-jump-and-run-game';
+
   constructor() {
   }
 
   ngOnInit(): void {
-    render();
+    preloadImages(() =>
+      render())
   }
 }

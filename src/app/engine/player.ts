@@ -1,5 +1,6 @@
 import {Box, BoxOptions} from "./box";
-import {camera, canvas, getLevelSize} from "./canvas";
+import {camera, canvas, ctx, getLevelSize} from "./canvas";
+import {IMAGE} from "./images";
 
 export interface PlayerOptions extends BoxOptions {
 
@@ -52,6 +53,12 @@ export class Player extends Box {
     })
   }
 
+  override draw() {
+    ctx.save();
+    ctx.drawImage(IMAGE['PLAYER'] as any, this.pos[0], this.pos[1], this.size[0], this.size[1]);
+    ctx.restore();
+  }
+
   override push(box: any, objects: any[]) {
     return {
       toLeft: () => {
@@ -87,6 +94,7 @@ export class Player extends Box {
       },
     }
   }
+
   override specificUpdates() {
     super.specificUpdates();
     const [width, height] = getLevelSize();
